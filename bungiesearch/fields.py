@@ -1,6 +1,6 @@
 from django.template import Context, loader
 from django.template.defaultfilters import striptags
-from six import iteritems
+from six import iteritems, text_type
 
 from elasticsearch_dsl.analysis import Analyzer
 
@@ -14,6 +14,7 @@ class AbstractField(object):
     '''
     meta_fields = ['_index', '_uid', '_type', '_id']
     common_fields = ['index_name', 'store', 'index', 'boost', 'null_value', 'copy_to', 'type', 'fields']
+
     @property
     def fields(self):
         try:
@@ -44,9 +45,12 @@ class AbstractField(object):
         '''
         if isinstance(self.coretype, list):
             if 'coretype' not in args:
-                raise KeyError('{} can be represented as one of the following types: {}. Specify which to select as the `coretype` parameter.'.format(unicode(self), ', '.join(self.coretype)))
+                raise KeyError('{} can be represented as one of the following types: {}. '
+                               'Specify which to select as the `coretype` parameter.'
+                               .format(text_type(self), ', '.join(self.coretype)))
             if args['coretype'] not in self.coretype:
-                raise KeyError('Core type {} is not supported by {}.'.format(args['coretype'], unicode(self)))
+                raise KeyError('Core type {} is not supported by {}.'
+                               .format(args['coretype'], text_type(self)))
             self.type = args.pop('coretype')
         else:
             self.type = self.coretype
@@ -57,7 +61,8 @@ class AbstractField(object):
 
         for attr, value in iteritems(args):
             if attr not in self.fields and attr not in AbstractField.common_fields:
-                raise KeyError('Attribute `{}` is not allowed for core type {}.'.format(attr, self.coretype))
+                raise KeyError('Attribute `{}` is not allowed for core type {}.'
+                               .format(attr, self.coretype))
             setattr(self, attr, value)
 
         for attr, value in iteritems(self.defaults):
@@ -77,7 +82,8 @@ class AbstractField(object):
             try:
                 return eval(self.eval_func)
             except Exception as e:
-                raise type(e)('Could not compute value of {} field (eval_as=`{}`): {}.'.format(unicode(self), self.eval_func, unicode(e)))
+                raise type(e)('Could not compute value of {} field (eval_as=`{}`): {}.'
+                              .format(text_type(self), self.eval_func, text_type(e)))
 
         elif self.model_attr:
             if isinstance(obj, dict):
@@ -90,8 +96,10 @@ class AbstractField(object):
                 return current_obj
 
         else:
-            raise KeyError('{0} gets its value via a model attribute, an eval function, a template, or is prepared in a method '
-                           'call but none of `model_attr`, `eval_as,` `template,` `prepare_{0}` is provided.'.format(unicode(self)))
+            raise KeyError('{0} gets its value via a model attribute, an eval function, '
+                           'a template, or is prepared in a method call but none of '
+                           '`model_attr`, `eval_as,` `template,` `prepare_{0}` is provided.'
+                           .format(text_type(self)))
 
     def json(self):
         json = {}
@@ -108,7 +116,9 @@ class AbstractField(object):
 # All the following definitions could probably be done with better polymorphism.
 class StringField(AbstractField):
     coretype = 'string'
-    fields = ['doc_values', 'term_vector', 'norms', 'index_options', 'analyzer', 'index_analyzer', 'search_analyzer', 'include_in_all', 'ignore_above', 'position_offset_gap', 'fielddata', 'similarity']
+    fields = ['doc_values', 'term_vector', 'norms', 'index_options', 'analyzer',
+              'index_analyzer', 'search_analyzer', 'include_in_all', 'ignore_above',
+              'position_offset_gap', 'fielddata', 'similarity']
     defaults = {'analyzer': 'snowball'}
 
     def value(self, obj):
