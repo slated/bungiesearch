@@ -17,27 +17,18 @@ class AbstractField(object):
 
     @property
     def fields(self):
-        try:
-            return self.fields
-        except:
-            raise NotImplementedError('Allowed fields are not defined.')
+        raise NotImplementedError('Allowed fields are not defined.')
 
     @property
     def coretype(self):
-        try:
-            return self.coretype
-        except:
-            raise NotImplementedError('Core type is not defined!')
+        raise NotImplementedError('Core type is not defined!')
 
     @property
     def defaults(self):
-        '''
+        """
         Stores default values.
-        '''
-        try:
-            return self.defaults
-        except:
-            return {}
+        """
+        return {}
 
     def __init__(self, **args):
         '''
