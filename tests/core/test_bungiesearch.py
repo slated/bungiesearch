@@ -306,8 +306,6 @@ class CoreTestCase(TestCase):
         db_item = NoUpdatedField.objects.get(pk=1)
         src_item = NoUpdatedField.objects.search.query('match', field_title='My title')[0]
         self.assertEqual(src_item.id, db_item.id, 'Searching for the object did not return the expected object id.')
-        # self.assertTrue(src_item._meta.proxy, 'Was expecting a proxy model after fetching item.')
-        # self.assertEqual(src_item._meta.proxy_for_model, NoUpdatedField, 'Proxy for model of search item is not "NoUpdatedField".')
 
     def test_concat_queries(self):
         items = Article.objects.bsearch_title_search('title')[::False] + NoUpdatedField.objects.search.query('match', field_title='My title')[::False]
