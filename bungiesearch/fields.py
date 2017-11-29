@@ -7,7 +7,9 @@ from django.utils.functional import cached_property
 from six import iteritems, text_type, python_2_unicode_compatible
 
 from elasticsearch_dsl.analysis import Analyzer
-from elasticsearch_dsl.field import String, Nested
+from elasticsearch_dsl.field import (
+    String, Nested, Float, Double, Byte, Short, Integer, Long, Boolean, Date,
+)
 from elasticsearch_dsl.utils import AttrDict
 
 
@@ -20,7 +22,6 @@ class AbstractField(object):
     """
     meta_fields = ['_index', '_uid', '_type', '_id']
     common_fields = ['index_name', 'store', 'index', 'boost', 'null_value', 'copy_to', 'type', 'fields']
-    dsl_field_class = None
 
     _system_fields = ('base_field', 'base_field_class', 'eval_func', 'model_attr', 'template_name')
 
@@ -56,7 +57,7 @@ class AbstractField(object):
         return None
 
     def get_base_field_class(self):
-        return self.dsl_field_class
+        return None
 
     def __init__(self, **args):
         """
@@ -158,7 +159,7 @@ class AbstractField(object):
     def __getattr__(self, item):
         # to be able to use bungiesearch fields as a part of Inner fields,
         # we should mimic elasticsearch_dsl fields behaviour.
-        # will work only for fields with `dsl_field_class` not empty.
+        # will work only for fields with `base_field_class` not empty.
         if self.base_field_class is not None and hasattr(self.base_field_class, item):
             return getattr(self.base_field, item)
         return super(AbstractField, self).__getattribute__(item)
@@ -187,15 +188,25 @@ class NumberField(AbstractField):
     coretype = ['float', 'double', 'byte', 'short', 'integer', 'long']
     fields = ['doc_values', 'precision_step', 'include_in_all', 'ignore_malformed', 'coerce']
 
+    _base_fields_map = {
+        'float': Float, 'double': Double, 'byte': Byte,
+        'short': Short, 'integer': Integer, 'long': Long,
+    }
+
+    def get_base_field_class(self):
+        return self._base_fields_map.get(self.type)
+
 
 class DateField(AbstractField):
     coretype = 'date'
     fields = ['format', 'doc_values', 'precision_step', 'include_in_all', 'ignore_malformed']
+    base_field_class = Date
 
 
 class BooleanField(AbstractField):
     coretype = 'boolean'
     fields = []  # No specific fields.
+    base_field_class = Boolean
 
 
 class NestedField(AbstractField):
@@ -204,7 +215,7 @@ class NestedField(AbstractField):
     def get_base_field(self):
         properties = {key: field.base_field
                       for key, field in self.properties.items()}
-        return self.dsl_field_class(**self._dsl_field_kwargs({'properties': properties}))
+        return self.base_field_class(**self._dsl_field_kwargs({'properties': properties}))
 
     def value(self, obj):
         multi = self.base_field._multi
