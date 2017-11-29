@@ -49,8 +49,9 @@ TEMPLATES = [
 
 BUNGIESEARCH = {
     'URLS': [os.getenv('ELASTIC_SEARCH_URL', 'localhost')],
+    'TIMEOUT': 10,
     'ES_SETTINGS': {
-        'http_auth': os.getenv('ELASTIC_SEARCH_AUTH')
+        'http_auth': os.getenv('ELASTIC_SEARCH_AUTH'),
     },
     'ALIASES': {
         'bsearch': 'core.search_aliases'
