@@ -8,7 +8,7 @@ from six import iteritems, text_type, python_2_unicode_compatible
 
 from elasticsearch_dsl.analysis import Analyzer
 from elasticsearch_dsl.field import (
-    String, Nested, Float, Double, Byte, Short, Integer, Long, Boolean, Date,
+    Text, Keyword, Nested, Float, Double, Byte, Short, Integer, Long, Boolean, Date,
 )
 from elasticsearch_dsl.utils import AttrDict
 
@@ -169,16 +169,31 @@ class AbstractField(object):
 
 
 # All the following definitions could probably be done with better polymorphism.
-class StringField(AbstractField):
-    coretype = 'string'
-    fields = ['doc_values', 'term_vector', 'norms', 'index_options', 'analyzer',
-              'index_analyzer', 'search_analyzer', 'include_in_all', 'ignore_above',
-              'position_offset_gap', 'fielddata', 'similarity']
+class TextField(AbstractField):
+    coretype = 'text'
+    fields = ['analyzer', 'boost', 'eager_global_ordinals', 'fielddata',
+              'fielddata_frequency_filter', 'fields', 'index', 'index_options',
+              'norms', 'position_increment_gap', 'store', 'search_analyzer',
+              'search_quote_analyzer', 'similarity', 'term_vector']
     defaults = {'analyzer': 'snowball'}
-    base_field_class = String
+    base_field_class = Text
 
     def value(self, obj):
-        val = super(StringField, self).value(obj)
+        val = super(TextField, self).value(obj)
+        if val is None:
+            return None
+        return striptags(val)
+
+
+class KeywordField(AbstractField):
+    coretype = 'keyword'
+    fields = ['boost', 'doc_values', 'eager_global_ordinals', 'fields', 'ignore_above',
+              'index', 'index_options', 'norms', 'null_value',
+              'store', 'similarity', 'normalizer']
+    base_field_class = Keyword
+
+    def value(self, obj):
+        val = super(KeywordField, self).value(obj)
         if val is None:
             return None
         return striptags(val)
