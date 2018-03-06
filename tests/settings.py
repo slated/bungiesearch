@@ -56,10 +56,10 @@ BUNGIESEARCH = {
     'ALIASES': {
         'bsearch': 'core.search_aliases'
     },
-    'INDICES': {
-        'bungiesearch_demo': 'core.search_indices',
-        'bungiesearch_demo_bis': 'core.search_indices_bis'
-    },
+    'INDICES': [
+        ('bungiesearch_demo', 'core.search_indices'),
+        ('bungiesearch_demo_bis', 'core.search_indices_bis'),
+    ],
     'SIGNALS': {
         'BUFFER_SIZE': 1,
         'SIGNAL_CLASS': 'core.bungie_signal.BungieTestSignalProcessor'

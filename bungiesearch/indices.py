@@ -7,7 +7,7 @@ from .logger import logger
 
 
 class ModelIndex(object):
-    '''
+    """
     Introspects a model to generate an indexable mapping and methods to extract objects.
     Supports custom fields, including Python code, and all elasticsearch field types (apart from binary type).
 
@@ -19,8 +19,9 @@ class ModelIndex(object):
     2. Define custom indexed fields as class attributes. Values must be instances AbstractField. Important info in 3b.
     3. Define a `Meta` subclass, which must contain at least `model` as a class attribute.
         a. Optional class attributes: `fields`, `excludes` and `additional_fields`.
-        b. If custom indexed field requires model attributes which are not in the difference between `fields` and `excludes`, these must be defined in `additional_fields`.
-    '''
+        b. If custom indexed field requires model attributes which are not in the difference
+            between `fields` and `excludes`, these must be defined in `additional_fields`.
+    """
     def __init__(self):
         # Introspect the model, adding/removing fields as needed.
         # Adds/Excludes should happen only if the fields are not already
@@ -31,7 +32,9 @@ class ModelIndex(object):
             raise AttributeError('ModelIndex {} does not contain a Meta class.'.format(self.__class__.__name__))
 
         self.model = getattr(_meta, 'model', None)
-        self.fields = {}
+        if self.model is None:
+            raise AttributeError("ModelIndex Meta should have non empty 'model' attribute.")
+
         fields = getattr(_meta, 'fields', [])
         excludes = getattr(_meta, 'exclude', [])
         hotfixes = getattr(_meta, 'hotfixes', {})
@@ -41,8 +44,11 @@ class ModelIndex(object):
         self.optimize_queries = getattr(_meta, 'optimize_queries', False)
         self.is_default = getattr(_meta, 'default', True)
         self.indexing_query = getattr(_meta, 'indexing_query', None)
+        self.index_name = getattr(_meta, 'index_name', self.model.__name__.lower())
+        self.index_settings = getattr(_meta, 'index_settings', {})
 
         # Add in fields from the model.
+        self.fields = {}
         self.fields.update(self._get_fields(fields, excludes, hotfixes))
         # Elasticsearch uses '_id' to identify items uniquely, so let's duplicate that field.
         # We're duplicating it in order for devs to still perform searches on `.id` as expected.
@@ -54,15 +60,14 @@ class ModelIndex(object):
                 continue
 
             if cls_attr in self.fields:
-                logger.info('Overwriting implicitly defined model field {} ({}) its explicit definition: {}.'.format(cls_attr, text_type(self.fields[cls_attr]), text_type(obj)))
+                logger.info('Overwriting implicitly defined model field {} ({}) its explicit definition: {}.'
+                            .format(cls_attr, text_type(self.fields[cls_attr]), text_type(obj)))
             self.fields[cls_attr] = obj
 
         self.fields['_id'] = self.fields[id_field]
 
     def matches_indexing_condition(self, item):
-        '''
-        Returns True by default to index all documents.
-        '''
+        """ Returns True by default to index all documents. """
         return True
 
     def get_model(self):
