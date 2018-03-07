@@ -154,6 +154,9 @@ class AbstractField(object):
             return self.base_field.to_dict()
         return self._dsl_field_kwargs()
 
+    def contribute_to_class(self, index_cls, field_name):
+        pass
+
     to_dict = json
 
     def __getattr__(self, item):
