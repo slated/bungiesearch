@@ -15,8 +15,8 @@ with open(join(dirname(__file__), 'README.rst')) as f:
 
 install_requires = [
     'django>=1.8',
-    'elasticsearch-dsl>=2.0.0,<3.0.0',
-    'elasticsearch>=2.0.0,<3.0.0',
+    'elasticsearch-dsl>=6.0.0',
+    'elasticsearch>=6.0.0',
     'python-dateutil',
     'six',
 ]
@@ -49,6 +49,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
         "Framework :: Django"
     ],
     keywords="elasticsearch haystack django bungiesearch",
