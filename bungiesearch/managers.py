@@ -3,7 +3,6 @@ from django.db.models import Manager
 
 from . import Bungiesearch
 from .logger import logger
-from .signals import get_signal_processor
 
 
 class BungiesearchManager(Manager):
@@ -24,18 +23,6 @@ class BungiesearchManager(Manager):
     def custom_search(self, index, doc_type):
         """ Performs a search on a custom elasticsearch index and mapping. Will not attempt to map result objects. """
         return Bungiesearch(raw_results=True).index(index).doc_type(doc_type)
-
-    def contribute_to_class(self, cls, name):
-        """ Sets up the signal processor.
-
-            Since self.model is not available in the constructor, we perform this operation here.
-        """
-        super(BungiesearchManager, self).contribute_to_class(cls, name)
-
-        settings = Bungiesearch.BUNGIE
-        if 'SIGNALS' in settings:
-            self.signal_processor = get_signal_processor()
-            self.signal_processor.setup(self.model)
 
     def __getattr__(self, alias):
         """ Shortcut for search aliases.

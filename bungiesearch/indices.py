@@ -1,5 +1,6 @@
 from six import iteritems, text_type, add_metaclass
 
+from django.conf import settings
 from elasticsearch_dsl.analysis import Analyzer
 
 from .fields import AbstractField, django_field_to_index
@@ -49,6 +50,11 @@ class ModelIndexMeta(type):
 
         cls.fields = tuple(fields.items())  # immutable member of class
 
+        signal_processor = None
+        if getattr(_meta, 'setup_signals', True):
+            signal_processor = cls.setup_signal_processor(cls.model)
+        cls.signal_processor = signal_processor
+
     def _get_fields(cls, fields, excludes, hotfixes):
         """
         Given any explicit fields to include and fields to exclude, add
@@ -81,6 +87,18 @@ class ModelIndexMeta(type):
             final_fields[f.name] = django_field_to_index(f, **attr)
 
         return final_fields
+
+    def setup_signal_processor(cls, model):
+        bungie_conf = settings.BUNGIESEARCH
+
+        signal_processor = None
+        if 'SIGNALS' in bungie_conf:
+            from .signals import get_signal_processor  # circular import
+
+            signal_processor = get_signal_processor()
+            signal_processor.setup(model)
+
+        return signal_processor
 
 
 @add_metaclass(ModelIndexMeta)
