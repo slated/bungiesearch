@@ -74,7 +74,7 @@ class ModelIndexMeta(type):
                 continue
 
             # If field is a relation, skip.
-            if getattr(f, 'rel'):
+            if getattr(f, 'rel', None):
                 continue
 
             attr = {'model_attr': f.name}
