@@ -10,6 +10,8 @@ from .aliases import SearchAlias
 from .indices import ModelIndex
 from .logger import logger
 
+default_app_config = 'bungiesearch.apps.BungiesearchConfig'
+
 
 class Bungiesearch(Search):
     """ This object is used to read Django settings and initialize the elasticsearch connection. """
