@@ -161,7 +161,7 @@ class Command(BaseCommand):
                 indices = src.get_indices()
             for index in indices:
                 mapping = {}
-                analysis = {'analyzer': {}, 'tokenizer': {}, 'filter': {}}
+                analysis = {'analyzer': {}, 'tokenizer': {}, 'filter': {}, 'char_filter': {}}
 
                 index_settings = {}
                 for mdl_idx in src.get_model_indices(index):
