@@ -151,7 +151,7 @@ class ModelIndex(object):
                 continue
 
             # If field is a relation, skip.
-            if getattr(f, 'rel'):
+            if getattr(f, 'related_model', None) is not None:
                 continue
 
             attr = {'model_attr': f.name}
