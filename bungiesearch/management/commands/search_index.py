@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 from six import iteritems
 
 from ... import Bungiesearch
@@ -101,6 +102,7 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         src = Bungiesearch(timeout=options.get('timeout'))
         es = src.get_es_instance()
+        wait_for_status = settings.BUNGIESEARCH.get('ES_SETTINGS', {}).get('wait_for_status', 'green')
 
         if not options['action']:
             raise ValueError('No action specified. Must be one of "create", "update" or "delete".')
@@ -158,7 +160,7 @@ class Command(BaseCommand):
                 logger.info('Creating index {} with {} doctypes.'.format(index, len(mapping)))
                 es.indices.create(index=index, body={'mappings': mapping, 'settings': {'analysis': analysis}})
 
-            es.cluster.health(index=','.join(indices), wait_for_status='green', timeout='30s')
+            es.cluster.health(index=','.join(indices), wait_for_status=wait_for_status, timeout='30s')
 
         elif options['action'] == 'update-mapping':
             if options['index']:
