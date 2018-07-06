@@ -1,4 +1,4 @@
-from bungiesearch.fields import DateField, NumberField, StringField
+from bungiesearch.fields import DateField, NumberField, TextField
 from bungiesearch.indices import ModelIndex
 from core.models import Article, NoUpdatedField, User
 
@@ -7,8 +7,8 @@ from .analysis import edge_ngram_analyzer
 
 class ArticleIndex(ModelIndex):
     effective_date = DateField(eval_as='obj.created if obj.created and obj.published > obj.created else obj.published')
-    meta_data = StringField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
-    text = StringField(template='article.txt', analyzer=edge_ngram_analyzer)
+    meta_data = TextField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
+    text = TextField(template='article.txt', analyzer=edge_ngram_analyzer)
 
     class Meta:
         model = Article
@@ -23,7 +23,7 @@ class ArticleIndex(ModelIndex):
 
 class UserIndex(ModelIndex):
     effective_date = DateField(eval_as='obj.created if obj.created and obj.updated > obj.created else obj.updated')
-    about = StringField(model_attr='about', analyzer=edge_ngram_analyzer)
+    about = TextField(model_attr='about', analyzer=edge_ngram_analyzer)
     int_about = NumberField(coretype='integer')
 
     def prepare_int_about(self, obj):

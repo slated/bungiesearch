@@ -1,12 +1,12 @@
-from bungiesearch.fields import DateField, StringField
+from bungiesearch.fields import DateField, TextField
 from bungiesearch.indices import ModelIndex
 from core.models import Article, ManangedButEmpty, User
 
 
 class ArticleIndex(ModelIndex):
     effective_date = DateField(eval_as='obj.created if obj.created and obj.published > obj.created else obj.published')
-    meta_data = StringField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
-    more_fields = StringField(eval_as='"some value"')
+    meta_data = TextField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
+    more_fields = TextField(eval_as='"some value"')
 
     class Meta:
         model = Article
@@ -21,8 +21,8 @@ class ArticleIndex(ModelIndex):
 
 class UserIndex(ModelIndex):
     effective_date = DateField(eval_as='obj.created if obj.created and obj.published > obj.created else obj.published')
-    meta_data = StringField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
-    more_fields = StringField(eval_as='"some value"')
+    meta_data = TextField(eval_as='" ".join([fld for fld in [obj.link, str(obj.tweet_count), obj.raw] if fld])')
+    more_fields = TextField(eval_as='"some value"')
 
     class Meta:
         model = User
