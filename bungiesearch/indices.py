@@ -133,7 +133,12 @@ class ModelIndex(object):
         self.fields = dict(self.__class__.fields)  # more convenient dict
 
     def matches_indexing_condition(self, item):
-        """ Returns True by default to index all documents. """
+        """ Check if the passed item should be indexed.
+
+            If `indexed_query` is None, True will be returned by default.
+        """
+        if self.indexing_query is not None:
+            return self.indexing_query.filter(pk=item.pk).exists()
         return True
 
     def get_model(self):
