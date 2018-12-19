@@ -182,7 +182,7 @@ class Command(BaseCommand):
                 index_settings.update({'analysis': analysis})
                 es.indices.create(index=index, body={'mappings': mapping, 'settings': index_settings})
 
-            es.cluster.health(index=','.join(indices), status='green', timeout='30s')
+            es.cluster.health(index=','.join(indices), timeout='30s')
 
         elif options['action'] == 'update-mapping':
             if options['index']:
